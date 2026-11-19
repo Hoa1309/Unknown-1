@@ -222,13 +222,13 @@ local function StartMainScript()
 	local EspMM2Enabled = false
 	local AimbotEnabled = false
 	local Fps144Enabled = false
-	local Res1920Enabled = false
 	local InvisibleEnabled = false
 	local AutoJumpEnabled = false
 	local InfiniteJumpEnabled = false
 	local TracerEnabled = true
 	local LagToggleEnabled = false
 	local DarkModeEnabled = false
+	local Ratio43Enabled = false
 	local HitboxSize = 23
 	local SelectedPlayer = nil
 	local savedPosition = nil
@@ -248,6 +248,18 @@ local function StartMainScript()
 				set_fps_cap(cap)
 			end
 		end)
+	end
+
+	local function applyStretchMode(factor)
+		getgenv().StretchFactor = factor
+		local cam = workspace.CurrentCamera
+		local rs = game:GetService("RunService")
+		if not getgenv().StretchLoaded then
+			getgenv().StretchLoaded = true
+			rs.RenderStepped:Connect(function()
+				cam.CFrame = cam.CFrame * CFrame.new(0, 0, 0, 1, 0, 0, 0, getgenv().StretchFactor, 0, 0, 0, 1)
+			end)
+		end
 	end
 
 	-- Nút MENU (Phóng to 1.5x + Liquid Glass)
@@ -398,13 +410,13 @@ local function StartMainScript()
 	local espBtn, espStroke = createButton("ESP : OFF", 5, buttonContainer)
 	local aimBtn, aimStroke = createButton("AIMBOT : OFF", 6, buttonContainer)
 	local fpsBtn, fpsStroke = createButton("144FPS : OFF", 7, buttonContainer)
-	local resBtn, resStroke = createButton("1920X1440 : OFF", 8, buttonContainer)
-	local invBtn, invStroke = createButton("TÀNG HÌNH : OFF", 9, buttonContainer)
-	local jumpBtn, jumpStroke = createButton("AUTO NHẢY : OFF", 10, buttonContainer)
-	local infJumpBtn, infJumpStroke = createButton("NHẢY VÔ HẠN : OFF", 11, buttonContainer)
-	local tracerBtn, tracerStroke = createButton("TRACER 120FPS : ON", 12, buttonContainer)
-	local lagBtn, lagStroke = createButton("LAG : OFF", 13, buttonContainer)
-	local darkBtn, darkStroke = createButton("DARK MODE : OFF", 14, buttonContainer)
+	local invBtn, invStroke = createButton("TÀNG HÌNH : OFF", 8, buttonContainer)
+	local jumpBtn, jumpStroke = createButton("AUTO NHẢY : OFF", 9, buttonContainer)
+	local infJumpBtn, infJumpStroke = createButton("NHẢY VÔ HẠN : OFF", 10, buttonContainer)
+	local tracerBtn, tracerStroke = createButton("TRACER 120FPS : ON", 11, buttonContainer)
+	local lagBtn, lagStroke = createButton("LAG : OFF", 12, buttonContainer)
+	local darkBtn, darkStroke = createButton("DARK MODE : OFF", 13, buttonContainer)
+	local ratio43Btn, ratio43Stroke = createButton("MÀN 4:3 : OFF", 14, buttonContainer)
 
 	tracerBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	tracerStroke.Transparency = 0.2
@@ -572,14 +584,6 @@ local function StartMainScript()
 		setMaxFPS(Fps144Enabled and 144 or 60)
 	end)
 
-	resBtn.MouseButton1Click:Connect(function(x, y)
-		moveLiquidTo(resBtn, x, y)
-		Res1920Enabled = not Res1920Enabled
-		resBtn.Text = Res1920Enabled and "1920X1440 : ON" or "1920X1440 : OFF"
-		resBtn.TextColor3 = Res1920Enabled and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(210, 220, 235)
-		resStroke.Transparency = Res1920Enabled and 0.2 or 0.55
-	end)
-
 	invBtn.MouseButton1Click:Connect(function(x, y)
 		moveLiquidTo(invBtn, x, y)
 		InvisibleEnabled = not InvisibleEnabled
@@ -648,6 +652,20 @@ local function StartMainScript()
 			Lighting.ClockTime = originalClockTime
 			Lighting.Brightness = originalBrightness
 			Lighting.Ambient = originalAmbient
+		end
+	end)
+
+	ratio43Btn.MouseButton1Click:Connect(function(x, y)
+		moveLiquidTo(ratio43Btn, x, y)
+		Ratio43Enabled = not Ratio43Enabled
+		ratio43Btn.Text = Ratio43Enabled and "MÀN 4:3 : ON" or "MÀN 4:3 : OFF"
+		ratio43Btn.TextColor3 = Ratio43Enabled and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(210, 220, 235)
+		ratio43Stroke.Transparency = Ratio43Enabled and 0.2 or 0.55
+
+		if Ratio43Enabled then
+			applyStretchMode(1.000000000)
+		else
+			applyStretchMode(0.676767)
 		end
 	end)
 
@@ -797,11 +815,7 @@ local function StartMainScript()
 		end
 
 		if Camera then
-			if Res1920Enabled then
-				Camera.FieldOfView = 85
-			else
-				Camera.FieldOfView = AimbotEnabled and 144 or 120
-			end
+			Camera.FieldOfView = AimbotEnabled and 144 or 120
 		end
 
 		local closestTarget = nil
