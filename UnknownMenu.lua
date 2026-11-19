@@ -953,3 +953,4 @@ submitBtn.MouseButton1Click:Connect(function()
 		keyBox.PlaceholderText = "Key Sai! Nhập lại..."
 	end
 end)
+-- Địt con mẹ nhà mày
